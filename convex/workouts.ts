@@ -1,0 +1,147 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
+
+export const list = query({
+  args: {
+    startDate: v.optional(v.number()),
+    endDate: v.optional(v.number()),
+  },
+  handler: async (ctx, { startDate, endDate }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      return [];
+    }
+
+    let workouts = await ctx.db
+      .query("workouts")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
+
+    if (startDate !== undefined) {
+      workouts = workouts.filter((w) => w.date >= startDate);
+    }
+    if (endDate !== undefined) {
+      workouts = workouts.filter((w) => w.date <= endDate);
+    }
+
+    return workouts;
+  },
+});
+
+export const get = query({
+  args: { workoutId: v.id("workouts") },
+  handler: async (ctx, { workoutId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+
+    const workout = await ctx.db.get(workoutId);
+    if (!workout || workout.userId !== userId) {
+      return null;
+    }
+
+    const sets = await ctx.db
+      .query("sets")
+      .withIndex("by_workout", (q) => q.eq("workoutId", workoutId))
+      .collect();
+
+    const exerciseIds = [...new Set(sets.map((s) => s.exerciseId))];
+    const exercises = await Promise.all(
+      exerciseIds.map((id) => ctx.db.get(id)),
+    );
+
+    return {
+      ...workout,
+      sets,
+      exercises: exercises.filter((e) => e !== null),
+    };
+  },
+});
+
+export const create = mutation({
+  args: {
+    date: v.number(),
+    notes: v.optional(v.string()),
+    duration: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+
+    return await ctx.db.insert("workouts", {
+      ...args,
+      userId,
+    });
+  },
+});
+
+export const remove = mutation({
+  args: { workoutId: v.id("workouts") },
+  handler: async (ctx, { workoutId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+
+    const workout = await ctx.db.get(workoutId);
+    if (!workout || workout.userId !== userId) {
+      throw new Error("Workout not found or unauthorized");
+    }
+
+    const sets = await ctx.db
+      .query("sets")
+      .withIndex("by_workout", (q) => q.eq("workoutId", workoutId))
+      .collect();
+
+    for (const set of sets) {
+      await ctx.db.delete(set._id);
+    }
+
+    await ctx.db.delete(workoutId);
+  },
+});
+
+export const stats = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      return null;
+    }
+
+    const workouts = await ctx.db
+      .query("workouts")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const allSets = await ctx.db.query("sets").collect();
+    const workoutIds = new Set(workouts.map((w) => w._id));
+    const userSets = allSets.filter((s) => workoutIds.has(s.workoutId));
+
+    const exerciseFrequency: Record<string, number> = {};
+    for (const set of userSets) {
+      const key = set.exerciseId;
+      exerciseFrequency[key] = (exerciseFrequency[key] || 0) + 1;
+    }
+
+    const sortedExercises = Object.entries(exerciseFrequency)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+
+    const favoriteExerciseIds = sortedExercises.map(([id]) => id);
+    const favoriteExercises = await Promise.all(
+      favoriteExerciseIds.map((id) => ctx.db.get(id as any)),
+    );
+
+    return {
+      totalWorkouts: workouts.length,
+      totalSets: userSets.length,
+      favoriteExercises: favoriteExercises.filter((e) => e !== null),
+    };
+  },
+});
