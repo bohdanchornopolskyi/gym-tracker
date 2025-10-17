@@ -72,7 +72,7 @@ export default function ExercisesPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Exercise Library</h1>
             <p className="text-sm text-muted-foreground">
@@ -86,7 +86,7 @@ export default function ExercisesPage() {
                 Add Custom Exercise
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="w-full sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Add Custom Exercise</DialogTitle>
                 <DialogDescription>
@@ -153,8 +153,30 @@ export default function ExercisesPage() {
             )
           }
         >
-          <div className="mb-4 flex items-center gap-4">
-            <TabsList>
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="md:hidden">
+              <Select
+                value={selectedCategory || "All"}
+                onValueChange={(value) =>
+                  setSelectedCategory(
+                    value === "All" ? undefined : (value as ExerciseCategory),
+                  )
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <TabsList className="hidden md:inline-flex">
               <TabsTrigger value="All">All</TabsTrigger>
               {categories.map((cat) => (
                 <TabsTrigger key={cat} value={cat}>
@@ -166,7 +188,7 @@ export default function ExercisesPage() {
               placeholder="Search exercises..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-xs"
+              className="w-full sm:max-w-xs"
             />
           </div>
 

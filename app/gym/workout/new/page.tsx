@@ -19,6 +19,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -197,7 +204,7 @@ export default function NewWorkoutPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">New Workout</h1>
             <p className="text-sm text-muted-foreground">
@@ -242,7 +249,7 @@ export default function NewWorkoutPage() {
             </CardContent>
           </Card>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold">Exercises</h2>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
@@ -251,7 +258,7 @@ export default function NewWorkoutPage() {
                   Add Exercise
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl">
+              <DialogContent className="w-full sm:max-w-3xl h-full sm:h-auto">
                 <DialogHeader>
                   <DialogTitle>Select Exercise</DialogTitle>
                 </DialogHeader>
@@ -298,7 +305,7 @@ export default function NewWorkoutPage() {
                     <div className="space-y-3">
                       {we.sets.map((set, idx) => (
                         <div key={idx}>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="w-12 text-sm font-medium">
                               Set {idx + 1}
                             </span>
@@ -320,7 +327,7 @@ export default function NewWorkoutPage() {
                               </Button>
                               <Input
                                 type="number"
-                                className="h-8 w-16 text-center"
+                                className="h-8 w-14 sm:w-16 text-center"
                                 value={set.reps}
                                 onChange={(e) =>
                                   updateSet(
@@ -370,7 +377,7 @@ export default function NewWorkoutPage() {
                               <Input
                                 type="number"
                                 step="0.5"
-                                className="h-8 w-20 text-center"
+                                className="h-8 w-16 sm:w-20 text-center"
                                 value={set.weight}
                                 onChange={(e) =>
                                   updateSet(
@@ -458,13 +465,33 @@ function ExerciseSelector({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      <div className="md:hidden">
+        <Select
+          value={selectedCategory}
+          onValueChange={(v) =>
+            setSelectedCategory(v as ExerciseCategory | "All")
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <Tabs
         value={selectedCategory}
         onValueChange={(v) =>
           setSelectedCategory(v as ExerciseCategory | "All")
         }
       >
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="hidden md:grid w-full grid-cols-7">
           <TabsTrigger value="All">All</TabsTrigger>
           {categories.map((cat) => (
             <TabsTrigger key={cat} value={cat}>

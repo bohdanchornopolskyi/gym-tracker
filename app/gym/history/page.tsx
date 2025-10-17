@@ -53,10 +53,12 @@ export default function HistoryPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-4">
-        <h1 className="text-2xl font-bold">Workout History</h1>
-        <p className="text-sm text-muted-foreground">
-          View and manage your past workouts
-        </p>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold">Workout History</h1>
+          <p className="text-sm text-muted-foreground">
+            View and manage your past workouts
+          </p>
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto p-4">

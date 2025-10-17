@@ -33,7 +33,7 @@ export default async function ProductPage() {
 
   return (
     <main className="flex max-h-screen grow flex-col overflow-hidden">
-      <div className="flex items-start justify-between border-b p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between border-b p-4">
         <div>
           <h1 className="text-2xl font-bold">Gym Tracker</h1>
           <p className="text-sm text-muted-foreground">
@@ -65,7 +65,7 @@ export default async function ProductPage() {
           </Card>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Link href="/gym/workout/new">
             <Card className="cursor-pointer transition-colors hover:bg-accent">
               <CardHeader>

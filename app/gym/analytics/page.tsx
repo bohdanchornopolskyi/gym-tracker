@@ -70,10 +70,12 @@ export default function AnalyticsPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-4">
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="text-sm text-muted-foreground">
-          Track your progress and performance
-        </p>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold">Analytics</h1>
+          <p className="text-sm text-muted-foreground">
+            Track your progress and performance
+          </p>
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto p-6">
@@ -200,7 +202,7 @@ export default function AnalyticsPage() {
               <CardDescription>Daily workout activity heatmap</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-10 gap-2">
+              <div className="grid grid-cols-7 sm:grid-cols-10 gap-2">
                 {heatmapData.map(({ date, count }) => {
                   const intensity = count === 0 ? 0 : Math.min(count * 33, 100);
                   return (
