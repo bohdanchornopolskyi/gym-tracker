@@ -50,7 +50,7 @@ function SignInWithGitHub() {
       className="flex-1"
       variant="outline"
       type="button"
-      onClick={() => void signIn("github", { redirectTo: "/gym" })}
+      onClick={() => void signIn("github")}
     >
       <GitHubLogoIcon className="mr-2 h-4 w-4" /> GitHub
     </Button>
