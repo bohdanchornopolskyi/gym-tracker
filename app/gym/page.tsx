@@ -1,6 +1,5 @@
 import { SeedExercises } from "@/components/SeedExercises";
 import { UserMenu } from "@/components/UserMenu";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,

@@ -118,7 +118,7 @@ export default function AnalyticsPage() {
                 <div className="flex flex-wrap gap-1">
                   {stats?.favoriteExercises.slice(0, 3).map((ex) => (
                     <Badge key={ex._id} variant="secondary" className="text-xs">
-                      {ex.name}
+                      {"name" in ex ? ex.name : "Unknown"}
                     </Badge>
                   )) || (
                     <span className="text-sm text-muted-foreground">

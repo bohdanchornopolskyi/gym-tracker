@@ -187,7 +187,7 @@ export default function ExercisesPage() {
 function ExerciseList({
   exercises,
 }: {
-  exercises: typeof useQuery<typeof api.exercises.list>;
+  exercises: ReturnType<typeof useQuery<typeof api.exercises.list>>;
 }) {
   if (exercises === undefined) {
     return <div className="text-center text-muted-foreground">Loading...</div>;

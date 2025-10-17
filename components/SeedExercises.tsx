@@ -19,6 +19,7 @@ export function SeedExercises() {
       const result = await seedExercises({});
       setMessage(result.message);
     } catch (error) {
+      console.error(error);
       setMessage("Error seeding exercises");
     } finally {
       setLoading(false);
