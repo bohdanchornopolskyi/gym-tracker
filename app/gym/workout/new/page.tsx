@@ -266,7 +266,9 @@ export default function NewWorkoutPage() {
           {workoutExercises.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                No exercises added. Click "Add Exercise" to get started.
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
+                No exercises added. Click &quot;Add Exercise&quot; to get
+                started.
               </CardContent>
             </Card>
           ) : (
@@ -346,7 +348,9 @@ export default function NewWorkoutPage() {
                               </Button>
                               <span className="text-sm">reps</span>
                             </div>
-                            <span className="text-muted-foreground">×</span>
+                            <span className="text-muted-foreground">
+                              &#215;
+                            </span>
                             <div className="flex items-center gap-1">
                               <Button
                                 variant="outline"
