@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 export default function HistoryPage() {
@@ -119,6 +119,7 @@ function WorkoutCard({
   onToggle: () => void;
   onDelete: () => void;
 }) {
+  const workoutStats = useQuery(api.workouts.getStats, { workoutId });
   const workoutDetails = useQuery(
     api.workouts.get,
     isExpanded ? { workoutId } : "skip",
@@ -136,8 +137,8 @@ function WorkoutCard({
     {} as Record<string, typeof workoutDetails.sets>,
   );
 
-  const uniqueExercises = workoutDetails?.exercises.length || 0;
-  const totalSets = workoutDetails?.sets.length || 0;
+  const uniqueExercises = workoutStats?.exerciseCount || 0;
+  const totalSets = workoutStats?.setCount || 0;
 
   return (
     <Card>
@@ -156,6 +157,11 @@ function WorkoutCard({
             )}
           </div>
           <div className="flex gap-2">
+            <Button variant="ghost" size="icon" asChild>
+              <a href={`/gym/workout/edit/${workoutId}`}>
+                <Edit className="h-4 w-4" />
+              </a>
+            </Button>
             <Button variant="ghost" size="icon" onClick={onDelete}>
               <Trash2 className="h-4 w-4" />
             </Button>

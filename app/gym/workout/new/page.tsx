@@ -64,6 +64,7 @@ export default function NewWorkoutPage() {
     [],
   );
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const exercises = useQuery(api.exercises.list, {});
   const createWorkout = useMutation(api.workouts.create);
@@ -184,21 +185,26 @@ export default function NewWorkoutPage() {
       return;
     }
 
-    const workoutId = await createWorkout({
-      date: new Date(date).getTime(),
-      notes: notes || undefined,
-    });
+    setIsSaving(true);
+    try {
+      const workoutId = await createWorkout({
+        date: new Date(date).getTime(),
+        notes: notes || undefined,
+      });
 
-    for (const we of workoutExercises) {
-      for (const set of we.sets) {
-        await createSet({
-          workoutId,
-          ...set,
-        });
+      for (const we of workoutExercises) {
+        for (const set of we.sets) {
+          await createSet({
+            workoutId,
+            ...set,
+          });
+        }
       }
-    }
 
-    router.push("/gym/history");
+      router.push("/gym/history");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -213,10 +219,10 @@ export default function NewWorkoutPage() {
           </div>
           <Button
             onClick={saveWorkout}
-            disabled={workoutExercises.length === 0}
+            disabled={workoutExercises.length === 0 || isSaving}
           >
             <Save className="mr-2 h-4 w-4" />
-            Save Workout
+            {isSaving ? "Saving..." : "Save Workout"}
           </Button>
         </div>
       </div>
@@ -273,7 +279,6 @@ export default function NewWorkoutPage() {
           {workoutExercises.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 No exercises added. Click &quot;Add Exercise&quot; to get
                 started.
               </CardContent>

@@ -106,6 +106,55 @@ export const remove = mutation({
   },
 });
 
+export const getStats = query({
+  args: { workoutId: v.id("workouts") },
+  handler: async (ctx, { workoutId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+
+    const workout = await ctx.db.get(workoutId);
+    if (!workout || workout.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const sets = await ctx.db
+      .query("sets")
+      .withIndex("by_workout", (q) => q.eq("workoutId", workoutId))
+      .collect();
+
+    const uniqueExercises = new Set(sets.map((s) => s.exerciseId));
+
+    return {
+      exerciseCount: uniqueExercises.size,
+      setCount: sets.length,
+    };
+  },
+});
+
+export const update = mutation({
+  args: {
+    workoutId: v.id("workouts"),
+    date: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    duration: v.optional(v.number()),
+  },
+  handler: async (ctx, { workoutId, ...updates }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+
+    const workout = await ctx.db.get(workoutId);
+    if (!workout || workout.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(workoutId, updates);
+  },
+});
+
 export const stats = query({
   args: {},
   handler: async (ctx) => {

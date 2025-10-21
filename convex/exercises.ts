@@ -60,6 +60,54 @@ export const create = mutation({
   },
 });
 
+export const update = mutation({
+  args: {
+    exerciseId: v.id("exercises"),
+    name: v.optional(v.string()),
+    category: v.optional(
+      v.union(
+        v.literal("Chest"),
+        v.literal("Back"),
+        v.literal("Legs"),
+        v.literal("Shoulders"),
+        v.literal("Arms"),
+        v.literal("Core"),
+      ),
+    ),
+    muscleGroup: v.optional(v.string()),
+  },
+  handler: async (ctx, { exerciseId, ...updates }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+
+    const exercise = await ctx.db.get(exerciseId);
+    if (!exercise || exercise.userId !== userId) {
+      throw new Error("Unauthorized or not a custom exercise");
+    }
+
+    await ctx.db.patch(exerciseId, updates);
+  },
+});
+
+export const remove = mutation({
+  args: { exerciseId: v.id("exercises") },
+  handler: async (ctx, { exerciseId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+
+    const exercise = await ctx.db.get(exerciseId);
+    if (!exercise || exercise.userId !== userId) {
+      throw new Error("Unauthorized or not a custom exercise");
+    }
+
+    await ctx.db.delete(exerciseId);
+  },
+});
+
 export const seed = mutation({
   args: {},
   handler: async (ctx) => {
