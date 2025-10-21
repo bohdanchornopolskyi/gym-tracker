@@ -271,11 +271,6 @@ export const seed = mutation({
         muscleGroup: "Abdominals",
       },
       {
-        name: "Russian Twists",
-        category: "Core" as const,
-        muscleGroup: "Obliques",
-      },
-      {
         name: "Leg Raises",
         category: "Core" as const,
         muscleGroup: "Lower Abdominals",
