@@ -11,10 +11,19 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Trash2, BookOpen } from "lucide-react";
 import { useState } from "react";
 
 export default function HistoryPage() {
@@ -119,11 +128,26 @@ function WorkoutCard({
   onToggle: () => void;
   onDelete: () => void;
 }) {
+  const [presetDialogOpen, setPresetDialogOpen] = useState(false);
+  const [presetName, setPresetName] = useState("");
   const workoutStats = useQuery(api.workouts.getStats, { workoutId });
   const workoutDetails = useQuery(
     api.workouts.get,
     isExpanded ? { workoutId } : "skip",
   );
+  const createPreset = useMutation(api.workoutPresets.createFromWorkout);
+
+  const handleSaveAsPreset = async () => {
+    if (!presetName.trim()) {
+      return;
+    }
+    await createPreset({
+      workoutId,
+      name: presetName.trim(),
+    });
+    setPresetName("");
+    setPresetDialogOpen(false);
+  };
 
   const exerciseGroups = workoutDetails?.sets.reduce(
     (groups, set) => {
@@ -179,6 +203,54 @@ function WorkoutCard({
       {isExpanded && workoutDetails && (
         <CardContent>
           <Separator className="mb-4" />
+          <div className="mb-4 flex justify-end">
+            <Dialog open={presetDialogOpen} onOpenChange={setPresetDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Save as Preset
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Save Workout as Preset</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="preset-name">Preset Name</Label>
+                    <Input
+                      id="preset-name"
+                      placeholder="Enter preset name"
+                      value={presetName}
+                      onChange={(e) => setPresetName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveAsPreset();
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setPresetDialogOpen(false);
+                        setPresetName("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSaveAsPreset}
+                      disabled={!presetName.trim()}
+                    >
+                      Save Preset
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="space-y-4">
             {Object.entries(exerciseGroups || {}).map(([exerciseId, sets]) => {
               const exercise = workoutDetails.exercises.find(

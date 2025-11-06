@@ -37,4 +37,21 @@ export default defineSchema({
   })
     .index("by_workout", ["workoutId"])
     .index("by_exercise", ["exerciseId"]),
+  workoutPresets: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    notes: v.optional(v.string()),
+    exercises: v.array(
+      v.object({
+        exerciseId: v.id("exercises"),
+        sets: v.array(
+          v.object({
+            reps: v.number(),
+            weight: v.number(),
+            restTime: v.optional(v.number()),
+          }),
+        ),
+      }),
+    ),
+  }).index("by_user", ["userId"]),
 });
