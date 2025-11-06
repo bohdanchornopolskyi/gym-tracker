@@ -3,6 +3,7 @@ import { Doc, Id } from "@/convex/_generated/dataModel";
 export type Exercise = Doc<"exercises">;
 export type Workout = Doc<"workouts">;
 export type Set = Doc<"sets">;
+export type WorkoutPreset = Doc<"workoutPresets">;
 
 export type ExerciseCategory =
   | "Chest"

@@ -14,6 +14,7 @@ import type * as exercises from "../exercises.js";
 import type * as http from "../http.js";
 import type * as sets from "../sets.js";
 import type * as users from "../users.js";
+import type * as workoutPresets from "../workoutPresets.js";
 import type * as workouts from "../workouts.js";
 
 import type {
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   sets: typeof sets;
   users: typeof users;
+  workoutPresets: typeof workoutPresets;
   workouts: typeof workouts;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
