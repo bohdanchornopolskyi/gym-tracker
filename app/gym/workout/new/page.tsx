@@ -38,9 +38,10 @@ import {
   Plus,
   Save,
   Trash2,
+  BookOpen,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 
 const categories: ExerciseCategory[] = [
   "Chest",
@@ -58,17 +59,64 @@ type WorkoutExercise = {
 
 export default function NewWorkoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const presetIdParam = searchParams.get("preset");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState("");
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>(
     [],
   );
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [presetDialogOpen, setPresetDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const exercises = useQuery(api.exercises.list, {});
+  const presets = useQuery(api.workoutPresets.list, {});
+  const preset = useQuery(
+    api.workoutPresets.get,
+    presetIdParam
+      ? { presetId: presetIdParam as Id<"workoutPresets"> }
+      : "skip",
+  );
   const createWorkout = useMutation(api.workouts.create);
   const createSet = useMutation(api.sets.create);
+  const loadedPresetIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (
+      preset &&
+      exercises &&
+      presetIdParam &&
+      loadedPresetIdRef.current !== presetIdParam
+    ) {
+      const presetExercisesData: WorkoutExercise[] = [];
+      for (const presetExercise of preset.exercises) {
+        const exercise = preset.exerciseDetails?.find(
+          (e) => e._id === presetExercise.exerciseId,
+        );
+        if (exercise) {
+          presetExercisesData.push({
+            exercise,
+            sets: presetExercise.sets.map((set, idx) => ({
+              exerciseId: exercise._id,
+              setNumber: idx + 1,
+              reps: set.reps,
+              weight: set.weight,
+              restTime: set.restTime,
+            })),
+          });
+        }
+      }
+      setWorkoutExercises(presetExercisesData);
+      if (preset.notes) {
+        setNotes(preset.notes);
+      }
+      loadedPresetIdRef.current = presetIdParam;
+    }
+    if (!presetIdParam) {
+      loadedPresetIdRef.current = null;
+    }
+  }, [preset, exercises, presetIdParam]);
 
   const addExercise = (exercise: Exercise) => {
     if (workoutExercises.find((we) => we.exercise._id === exercise._id)) {
@@ -255,23 +303,89 @@ export default function NewWorkoutPage() {
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold">Exercises</h2>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Exercise
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="w-full sm:max-w-3xl h-full sm:h-auto">
-                <DialogHeader>
-                  <DialogTitle>Select Exercise</DialogTitle>
-                </DialogHeader>
-                <ExerciseSelector
-                  exercises={exercises}
-                  onSelect={addExercise}
-                />
-              </DialogContent>
-            </Dialog>
+            <div className="flex gap-2">
+              <Dialog
+                open={presetDialogOpen}
+                onOpenChange={setPresetDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Load Preset
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-full sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Select Preset</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-2">
+                      {presets?.map((preset) => (
+                        <Card
+                          key={preset._id}
+                          className="cursor-pointer transition-colors hover:bg-accent"
+                          onClick={() => {
+                            router.push(
+                              `/gym/workout/new?preset=${preset._id}`,
+                            );
+                            setPresetDialogOpen(false);
+                          }}
+                        >
+                          <CardHeader className="py-3">
+                            <CardTitle className="text-base">
+                              {preset.name}
+                            </CardTitle>
+                            {preset.notes && (
+                              <CardDescription className="text-xs">
+                                {preset.notes}
+                              </CardDescription>
+                            )}
+                            <CardDescription className="text-xs mt-1">
+                              {preset.exercises.length} Exercise
+                              {preset.exercises.length !== 1 ? "s" : ""} •{" "}
+                              {preset.exercises.reduce(
+                                (sum, ex) => sum + ex.sets.length,
+                                0,
+                              )}{" "}
+                              Set
+                              {preset.exercises.reduce(
+                                (sum, ex) => sum + ex.sets.length,
+                                0,
+                              ) !== 1
+                                ? "s"
+                                : ""}
+                            </CardDescription>
+                          </CardHeader>
+                        </Card>
+                      ))}
+                      {(!presets || presets.length === 0) && (
+                        <p className="py-8 text-center text-muted-foreground">
+                          No presets available. Save a workout as a preset
+                          first.
+                        </p>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Exercise
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-full sm:max-w-3xl h-full sm:h-auto">
+                  <DialogHeader>
+                    <DialogTitle>Select Exercise</DialogTitle>
+                  </DialogHeader>
+                  <ExerciseSelector
+                    exercises={exercises}
+                    onSelect={addExercise}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           {workoutExercises.length === 0 ? (
