@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import {
   Activity,
   BarChart3,
+  Bookmark,
   Dumbbell,
   History,
   HomeIcon,
@@ -78,6 +79,10 @@ function DesktopMenu() {
           <Dumbbell className="h-4 w-4" />
           Exercises
         </MenuLink>
+        <MenuLink href="/gym/presets">
+          <Bookmark className="h-4 w-4" />
+          Presets
+        </MenuLink>
         <MenuLink href="/gym/history">
           <History className="h-4 w-4" />
           History
@@ -126,6 +131,10 @@ function MobileMenu() {
           <MenuLink href="/gym/exercises" onClick={handleLinkClick}>
             <Dumbbell className="h-4 w-4" />
             Exercises
+          </MenuLink>
+          <MenuLink href="/gym/presets" onClick={handleLinkClick}>
+            <Bookmark className="h-4 w-4" />
+            Presets
           </MenuLink>
           <MenuLink href="/gym/history" onClick={handleLinkClick}>
             <History className="h-4 w-4" />
