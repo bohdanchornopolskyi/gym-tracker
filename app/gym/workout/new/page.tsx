@@ -200,8 +200,6 @@ export default function NewWorkoutPage() {
           });
         }
       }
-
-      router.push("/gym/history");
     } finally {
       setIsSaving(false);
     }
