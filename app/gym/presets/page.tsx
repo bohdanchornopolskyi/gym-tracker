@@ -20,9 +20,8 @@ import { useRouter } from "next/navigation";
 
 export default function PresetsPage() {
   const router = useRouter();
-  const [expandedPreset, setExpandedPreset] = useState<Id<"workoutPresets"> | null>(
-    null,
-  );
+  const [expandedPreset, setExpandedPreset] =
+    useState<Id<"workoutPresets"> | null>(null);
   const presets = useQuery(api.workoutPresets.list, {});
   const deletePreset = useMutation(api.workoutPresets.remove);
 
@@ -160,7 +159,7 @@ function PresetCard({
         <CardContent>
           <Separator className="mb-4" />
           <div className="space-y-4">
-            {presetDetails.exercises.map((presetExercise, idx) => {
+            {presetDetails.exercises.map((presetExercise) => {
               const exercise = presetDetails.exerciseDetails?.find(
                 (e) => e._id === presetExercise.exerciseId,
               );
@@ -194,4 +193,3 @@ function PresetCard({
     </Card>
   );
 }
-
